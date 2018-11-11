@@ -137,7 +137,7 @@ func vecMinus(v1 []float64, v2 []float64) []float64 {
 	return res
 }
 
-func inverMat(A [][]float64) [][]float64 {
+func InverMat(A [][]float64) [][]float64 {
 	var E [][]float64
 	n := len(A)
 	for i := 0; i < n; i++ {
@@ -214,7 +214,7 @@ func main() {
 	//printMatrix(arr, c)
 	//GaussianElimination(arr, c)
 	mul(arr, arr2)
-	inverMat(arr)
+	InverMat(arr)
 	//b := []float64{1, 1, 10}
 	//Jacobi(arr, b)
 	//fmt.Printf("%2.3f", DET)
