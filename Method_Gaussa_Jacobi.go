@@ -78,16 +78,149 @@ func GaussianElimination(A [][]float64, b [][]float64) error {
 	}
 
 	DET *= math.Pow(-1, CHAN)
-
 	return nil
+}
+
+func mul(A [][]float64, B [][]float64) [][]float64 {
+	var tmp [][]float64
+	n := len(A)
+	for i := 0; i < n; i++ {
+		tmp = append(tmp, []float64{})
+		for j := 0; j < n; j++ {
+			tmp[i] = append(tmp[i], 0)
+		}
+	}
+	for i := 0; i < n; i++ {
+		for j := 0; j < n; j++ {
+			for k := 0; k < n; k++ {
+				//noinspection ALL
+				tmp[i][j] += A[i][k] * B[k][j]
+			}
+		}
+	}
+	k := [][]float64{{}, {}, {}}
+	printMatrix(tmp, k)
+	return tmp
+}
+
+func norm(A [][]float64) float64 {
+	var sum float64
+	norm := 0.
+	for i := 0; i < len(A); i++ {
+		for j := 0; j < len(A); j++ {
+			sum += math.Abs(A[i][j])
+		}
+		if sum > norm {
+			norm = sum
+		}
+		sum = 0
+	}
+	return norm
+}
+
+func vecNorm(v []float64) float64 {
+	var res float64
+	for i := 0; i < len(v); i++ {
+		res += math.Pow(v[i], 2)
+	}
+	return math.Sqrt(res)
+}
+
+func vecMinus(v1 []float64, v2 []float64) []float64 {
+	var res []float64
+	for j := 0; j < len(v1); j++ {
+		res = append(res, 0)
+	}
+	for i := 0; i < len(v1); i++ {
+		res[i] = v1[i] - v2[i]
+	}
+	return res
+}
+
+func inverMat(A [][]float64) [][]float64 {
+	var E [][]float64
+	n := len(A)
+	for i := 0; i < n; i++ {
+		E = append(E, []float64{})
+		for j := 0; j < n; j++ {
+			if i == j {
+				E[i] = append(E[i], 1)
+			} else {
+				E[i] = append(E[i], 0)
+			}
+		}
+	}
+
+	GaussianElimination(A, E)
+	return E
+}
+
+func diagMat(A [][]float64) [][]float64 {
+	var diagonal [][]float64
+	n := len(A)
+	for i := 0; i < n; i++ {
+		diagonal = append(diagonal, []float64{})
+		for j := 0; j < n; j++ {
+			if i == j {
+				diagonal[i] = append(diagonal[i], A[i][i])
+			} else {
+				diagonal[i] = append(diagonal[i], 0)
+			}
+		}
+	}
+	return diagonal
+}
+
+func Jacobi(A [][]float64, b []float64) {
+	n := len(A)
+	x := []float64{-0.8, 0.9, 1.8}
+	//diagonal := diagMat(A)
+	var tempX []float64
+	for j := 0; j < n; j++ {
+		tempX = append(tempX, 0)
+	}
+
+	l := (1 - norm(A)) * EPS / norm(A)
+
+	//for i := 0; i < n; i++ {
+	//	x = append(x, 1)
+	//}
+
+	for vecNorm(vecMinus(tempX, x)) > l {
+		x = tempX
+		for i := 0; i < n; i++ {
+			tempX[i] = b[i]
+			for g := 0; g < n; g++ {
+				if i != g {
+					tempX[i] -= A[i][g] * x[g]
+				}
+				tempX[i] /= A[i][i]
+			}
+		}
+		/*norma = math.Abs(x[0] - tmpX[0])
+		for h := 0; h < n; h++ {
+			if (math.Abs(x[h] - tmpX[h])) > norma {
+				norma = math.Abs(x[h] - tmpX[h])
+				x[h] = tmpX[h]
+			}
+		}*/
+	}
 }
 
 func main() {
 	arr := [][]float64{{2, -4, -1}, {-2, 3, -2}, {4, -11, -13}}
-	c := [][]float64{{1, 0, 0}, {1, 0, 0}, {10, 0, 0}}
-	printMatrix(arr, c)
-	GaussianElimination(arr, c)
-	fmt.Printf("%2.3f", DET)
+	//c := [][]float64{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}}
+	arr2 := [][]float64{{-15.25, -10.25, 2.75}, {-8.5, -5.5, 1.5}, {2.5, 1.5, -0.5}}
+	//printMatrix(arr, c)
+	//GaussianElimination(arr, c)
+	mul(arr, arr2)
+	inverMat(arr)
+	//b := []float64{1, 1, 10}
+	//Jacobi(arr, b)
+	//fmt.Printf("%2.3f", DET)
+	fmt.Printf("%2f\n", norm(arr))
+	fmt.Printf("%2f\n", norm(arr2))
+	fmt.Printf("cond(A) %f \n", norm(arr)*norm(arr2))
 }
 
 func printMatrix(A [][]float64, b [][]float64) {
